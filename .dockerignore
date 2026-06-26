@@ -1,0 +1,21 @@
+# Node.js
+**/node_modules
+**/dist
+**/.env
+.git
+.gitignore
+.qodo
+README.md
+capstyoneproject guidelines.pdf
+
+# Python
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.pytest_cache
+**/venv
+**/.venv
+**/env
+**/.env
+**/*.db
