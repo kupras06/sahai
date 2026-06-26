@@ -1,4 +1,7 @@
+import os
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
@@ -17,9 +20,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(chat.router)
-app.include_router(whatsapp.router)
-app.include_router(nudge.router)
+app.include_router(chat.router, prefix="/api")
+app.include_router(whatsapp.router, prefix="/api")
+app.include_router(nudge.router, prefix="/api")
 
 
 @app.on_event("startup")
@@ -27,6 +30,21 @@ async def startup():
     init_db()
 
 
-@app.get("/")
-async def root():
+@app.get("/api/health")
+async def health():
     return {"message": "SAHAI API is running"}
+
+
+# Serve frontend static assets in production
+frontend_dist_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../frontend/dist"))
+
+if os.path.exists(frontend_dist_path):
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist_path, "assets")), name="static")
+
+    @app.get("/{catchall:path}")
+    async def serve_frontend(catchall: str):
+        index_path = os.path.join(frontend_dist_path, "index.html")
+        if os.path.exists(index_path):
+            with open(index_path, "r") as f:
+                return HTMLResponse(content=f.read(), status_code=200)
+
